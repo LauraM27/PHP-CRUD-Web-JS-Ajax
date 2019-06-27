@@ -1,5 +1,5 @@
 <?php
-//commentaire
+/*commentaire 1*/
 $liste = RegionManager::getList();
 ?>
 <div class="espaceHorizon "></div>
