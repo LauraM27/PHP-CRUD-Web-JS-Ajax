@@ -1,0 +1,77 @@
+<?php
+
+class PersonneManager
+{
+
+    public static function add(Personne $perso)
+    {
+        $db = DbConnect::getDb(); // Instance de PDO.
+        // Pr�paration de la requ�te d'insertion.
+        $q = $db->prepare('INSERT INTO personnes(nom, prenom, codePostal, adresse, ville) VALUES(:nom, :prenom, :codePostal, :adresse, :ville)');
+
+        // Assignation des valeurs pour le nom, le pr�nom.
+        $q->bindValue(':nom', $perso->getNom());
+        $q->bindValue(':prenom', $perso->getPrenom());
+        $q->bindValue(':adresse', $perso->getAdresse());
+        $q->bindValue(':ville', $perso->getVille());
+        $q->bindValue(':codePostal', $perso->getCodePostal());
+
+        // Ex�cution de la requ�te.
+        $q->execute();
+
+    }
+
+    public static function delete(Personne $perso)
+    {
+        $db = DbConnect::getDb(); // Instance de PDO.
+        // Ex�cute une requ�te de type DELETE.
+        $db->exec('DELETE FROM personnes WHERE id = ' . $perso->getId());
+    }
+
+    public static function getById($id)
+    {
+        $db = DbConnect::getDb(); // Instance de PDO.
+        // Ex�cute une requ�te de type SELECT avec une clause WHERE, et retourne un objet Personne.
+        $id = (int) $id;
+
+        $q = $db->query('SELECT id, nom, prenom, codePostal, adresse, ville FROM personnes WHERE id = ' . $id);
+        $donnees = $q->fetch(PDO::FETCH_ASSOC);
+
+        return new Personne($donnees);
+    }
+
+    public static function getList()
+    {
+        $db = DbConnect::getDb(); // Instance de PDO.
+        // Retourne la liste de tous les personnes.
+
+        $q = $db->query('SELECT id, nom, prenom, codePostal, adresse, ville FROM personnes ORDER BY nom');
+
+        if ($donnees = $q->fetch(PDO::FETCH_ASSOC)) {//test si la requête renvoi des données
+            do {
+                $persos[] = new Personne($donnees);
+            } while ($donnees = $q->fetch(PDO::FETCH_ASSOC));
+            return $persos;
+        } else {
+            return null;
+        }
+    }
+
+    public static function update(Personne $perso)
+    {
+        $db = DbConnect::getDb(); // Instance de PDO.
+        // Pr�pare une requ�te de type UPDATE.
+        $q = $db->prepare('UPDATE personnes SET nom=:nom, prenom=:prenom ,codePostal=:codePostal, adresse=:adresse, ville=:ville WHERE id = :id');
+
+        // Assignation des valeurs � la requ�te.
+        $q->bindValue(':nom', $perso->getNom());
+        $q->bindValue(':prenom', $perso->getPrenom());
+        $q->bindValue(':id', $perso->getId());
+        $q->bindValue(':adresse', $perso->getAdresse());
+        $q->bindValue(':ville', $perso->getVille());
+        $q->bindValue(':codePostal', $perso->getCodePostal());
+        // Ex�cution de la requ�te.
+        $res = $q->execute();
+    }
+
+}
